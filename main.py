@@ -293,6 +293,14 @@ def draw_side_bar(frame: np.ndarray):
         cv2.LINE_AA
     )
 
+    # DRAW HORZ LINE
+    cv2.line(
+        frame,
+        (x1, 130),
+        (x2, 130),
+        COL_YELLOW, 1
+    )
+
 
 while True:
     ret, frame = cap.read()
@@ -337,14 +345,6 @@ while True:
         COL_GREEN if current_user != "Unknown"
         else COL_RED, 1,
         cv2.LINE_AA
-    )
-
-    # DRAW LINE
-    cv2.line(
-        frame,
-        (20, 130),
-        (int(w/5) - 10, 130),
-        COL_YELLOW, 1
     )
 
     if admin_data is not None:
