@@ -4,6 +4,13 @@ import numpy as np
 import mediapipe as mp
 
 
+# =====================================
+# CONFIGURATIONS
+# =====================================
+
+# -------------------------------
+# COLORS
+# -------------------------------
 COL_YELLOW = (0, 200, 240)
 COL_GREEN  = (0, 255, 0)
 COL_RED    = (0, 0, 255)
@@ -11,11 +18,17 @@ COL_WHITE  = (255, 255, 255)
 COL_BLACK  = (40, 40, 40)
 
 
+# -------------------------------
+# CAMERA READER
+# -------------------------------
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 
+# -------------------------------
+# MEDIAPIPE SOLUTIONS
+# -------------------------------
 mp_drawing = mp.solutions.drawing_utils
 
 mp_face = mp.solutions.face_detection
@@ -25,91 +38,138 @@ face = mp_face.FaceDetection(
 )
 
 
+# -------------------------------
+# COLLECT ADMIN DATA
+# -------------------------------
 frame_data = []
-num_frames = 200
+num_frames = 300
 counted_frames = 0
-
 is_collecting = False
-admin_data = None
 
+
+# -------------------------------
+# ADMIN VERIFICATION
+# -------------------------------
+admin_data = None
 admin_status = "Not found"
 current_user = "Unknown"
 
 
+# -------------------------------
+# ROI & BOUNDING BOX
+# -------------------------------
+roi = None
+bbox_corner_size = 40
+bbox_center_mid_size = 20
+
+# =====================================
+
+
 def draw_bbox(x1, y1, x2, y2):
+    center = int((x1 + x2)/2)
+    middle = int((y1 + y2)/2)
+
+    rect_thick = 2
+    corner_thick = 8
+    cv2.rectangle(
+        frame,
+        (x1, y1),
+        (x2, y2),
+        COL_GREEN, rect_thick,
+        cv2.LINE_AA
+    )
+
     # TOP - RIGHT
     cv2.line(
         frame,
         (x1, y1),
-        (x1, y1 + int((y2 - y1)/4)),
-        COL_GREEN, 2
+        (x1, y1 + bbox_corner_size),
+        COL_GREEN, corner_thick
     )
 
     cv2.line(
         frame,
         (x1, y1),
-        (x1 + int((x2 - x1)/4), y1),
-        COL_GREEN, 2
+        (x1 + bbox_corner_size, y1),
+        COL_GREEN, corner_thick
     )
 
     # TOP - LEFT
     cv2.line(
         frame,
         (x2, y1),
-        (x2, y1 + int((y2 - y1)/4)),
-        COL_GREEN, 2
+        (x2, y1 + bbox_corner_size),
+        COL_GREEN, corner_thick
     )
 
     cv2.line(
         frame,
         (x2, y1),
-        (x2 - int((x2 - x1)/4), y1),
-        COL_GREEN, 2
+        (x2 - bbox_corner_size, y1),
+        COL_GREEN, corner_thick
     )
 
     # BOTTOM - RIGHT
     cv2.line(
         frame,
         (x1, y2),
-        (x1, y2 - int((y2 - y1)/4)),
-        COL_GREEN, 2
+        (x1, y2 - bbox_corner_size),
+        COL_GREEN, corner_thick
     )
 
     cv2.line(
         frame,
         (x1, y2),
-        (x1 + int((x2 - x1)/4), y2),
-        COL_GREEN, 2
+        (x1 + bbox_corner_size, y2),
+        COL_GREEN, corner_thick
     )
 
     # BOTTOM - LEFT
     cv2.line(
         frame,
         (x2, y2),
-        (x2, y2 - int((y2 - y1)/4)),
-        COL_GREEN, 2
+        (x2, y2 - bbox_corner_size),
+        COL_GREEN, corner_thick
     )
 
     cv2.line(
         frame,
         (x2, y2),
-        (x2 - int((x2 - x1)/4), y2),
-        COL_GREEN, 2
+        (x2 - bbox_corner_size, y2),
+        COL_GREEN, corner_thick
     )
 
-    # DRAW CROSS
-    cv2.line(
-        frame,
-        (x1 + int((x2 - x1)/2), y1 + int((y2 - y1)/1.8)),
-        (x1 + int((x2 - x1)/2), y2 - int((y2 - y1)/1.8)),
-        COL_GREEN, 2
-    )
 
     cv2.line(
         frame,
-        (x1 + int((x2 - x1)/1.8), y1 + int((y2 - y1)/2)),
-        (x2 - int((x2 - x1)/1.8), y1 + int((y2 - y1)/2)),
-        COL_GREEN, 2
+        (center, y1),
+        (center, y1 + bbox_center_mid_size),
+        COL_GREEN, rect_thick,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (center, y2),
+        (center, y2 - bbox_center_mid_size),
+        COL_GREEN, rect_thick,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x1, middle),
+        (x1 + bbox_center_mid_size, middle),
+        COL_GREEN, rect_thick,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x2, middle),
+        (x2 - bbox_center_mid_size, middle),
+        COL_GREEN, rect_thick,
+        cv2.LINE_AA
     )
 
 
@@ -274,7 +334,7 @@ while True:
         (20, 65),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
-        COL_GREEN if current_user is not "Unknown"
+        COL_GREEN if current_user != "Unknown"
         else COL_RED, 1,
         cv2.LINE_AA
     )
@@ -336,13 +396,13 @@ while True:
     if key == ord(' '):
         is_collecting = True
 
-    if is_collecting and counted_frames < num_frames:
+    if is_collecting and roi is not None and counted_frames < num_frames:
         frame_data.append(roi)
         counted_frames += 1
 
         cv2.putText(
             frame,
-            f"Scanning {counted_frames}/{num_frames}",
+            f"Scanning {int((counted_frames/num_frames)*100)}%",
             (20, 100),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5, (150, 150, 150), 1,
@@ -351,7 +411,7 @@ while True:
 
         cv2.putText(
             frame,
-            "Slowly turn your face left and right",
+            "Slightly turn your face left and right",
             (20, 120),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.4, (150, 150, 150), 1,
@@ -364,7 +424,7 @@ while True:
         is_collecting = False
         frame_data.clear()
 
-    if key == ord('r'):
+    if key == ord('r') or key == ord('R'):
         admin_data = None
         current_user = "Unknown"
         counted_frames = 0
