@@ -241,7 +241,7 @@ while True:
         0.8, (255, 255, 255), 1,
         cv2.LINE_AA
     )
-    frame[h - 450:h - 450 + 200:, 20:20 + 200] = admin_img
+    frame[h - 450:h - 450 + 200:, 30:30 + 200] = admin_img
 
     cv2.putText(
         frame,
