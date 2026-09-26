@@ -7,7 +7,7 @@ It uses `opencv` to extract camera frame and `mediapipe` face detection solution
 ## Requirements
 ### What I've used in this project
 - python 3.10
-- mediapipe == 0.10.21
+- mediapipe 0.10.21
 - opencv-python
 - numpy
 
