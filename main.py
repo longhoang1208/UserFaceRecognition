@@ -4,6 +4,13 @@ import numpy as np
 import mediapipe as mp
 
 
+COL_YELLOW = (0, 200, 240)
+COL_GREEN  = (0, 255, 0)
+COL_RED    = (0, 0, 255)
+COL_WHITE  = (255, 255, 255)
+COL_BLACK  = (40, 40, 40)
+
+
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -19,7 +26,7 @@ face = mp_face.FaceDetection(
 
 
 frame_data = []
-num_frames = 150
+num_frames = 200
 counted_frames = 0
 
 is_collecting = False
@@ -35,14 +42,14 @@ def draw_bbox(x1, y1, x2, y2):
         frame,
         (x1, y1),
         (x1, y1 + int((y2 - y1)/4)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     cv2.line(
         frame,
         (x1, y1),
         (x1 + int((x2 - x1)/4), y1),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     # TOP - LEFT
@@ -50,14 +57,14 @@ def draw_bbox(x1, y1, x2, y2):
         frame,
         (x2, y1),
         (x2, y1 + int((y2 - y1)/4)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     cv2.line(
         frame,
         (x2, y1),
         (x2 - int((x2 - x1)/4), y1),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     # BOTTOM - RIGHT
@@ -65,14 +72,14 @@ def draw_bbox(x1, y1, x2, y2):
         frame,
         (x1, y2),
         (x1, y2 - int((y2 - y1)/4)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     cv2.line(
         frame,
         (x1, y2),
         (x1 + int((x2 - x1)/4), y2),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     # BOTTOM - LEFT
@@ -80,14 +87,14 @@ def draw_bbox(x1, y1, x2, y2):
         frame,
         (x2, y2),
         (x2, y2 - int((y2 - y1)/4)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     cv2.line(
         frame,
         (x2, y2),
         (x2 - int((x2 - x1)/4), y2),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     # DRAW CROSS
@@ -95,14 +102,14 @@ def draw_bbox(x1, y1, x2, y2):
         frame,
         (x1 + int((x2 - x1)/2), y1 + int((y2 - y1)/1.8)),
         (x1 + int((x2 - x1)/2), y2 - int((y2 - y1)/1.8)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
     cv2.line(
         frame,
         (x1 + int((x2 - x1)/1.8), y1 + int((y2 - y1)/2)),
         (x2 - int((x2 - x1)/1.8), y1 + int((y2 - y1)/2)),
-        (0, 255, 0), 2
+        COL_GREEN, 2
     )
 
 
@@ -117,25 +124,56 @@ def draw_side_bar(frame: np.ndarray):
     cv2.circle(
         frame,
         (x1 + r, y1 + r),
-        r, (40, 40, 40), -1
+        r, COL_BLACK, -1,
+        cv2.LINE_AA
     )
 
     cv2.circle(
         frame,
         (x2 - r, y1 + r),
-        r, (40, 40, 40), -1
+        r, COL_BLACK, -1,
+        cv2.LINE_AA
     )
 
     cv2.circle(
         frame,
         (x1 + r, y2 - r),
-        r, (40, 40, 40), -1
+        r, COL_BLACK, -1,
+        cv2.LINE_AA
     )
 
     cv2.circle(
         frame,
         (x2 - r, y2 - r),
-        r, (40, 40, 40), -1,
+        r, COL_BLACK, -1,
+        cv2.LINE_AA
+    )
+
+    cv2.circle(
+        frame,
+        (x1 + r, y1 + r),
+        r, COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.circle(
+        frame,
+        (x2 - r, y1 + r),
+        r, COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.circle(
+        frame,
+        (x1 + r, y2 - r),
+        r, COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.circle(
+        frame,
+        (x2 - r, y2 - r),
+        r, COL_YELLOW, 1,
         cv2.LINE_AA
     )
 
@@ -143,7 +181,7 @@ def draw_side_bar(frame: np.ndarray):
         frame,
         (x1, y1 + r),
         (x1 + r, y2 - r),
-        (40, 40, 40), -1,
+        COL_BLACK, -1,
         cv2.LINE_AA
     )
 
@@ -151,7 +189,7 @@ def draw_side_bar(frame: np.ndarray):
         frame,
         (x2, y1 + r),
         (x2 - r, y2 - r),
-        (40, 40, 40), -1,
+        COL_BLACK, -1,
         cv2.LINE_AA
     )
 
@@ -159,7 +197,39 @@ def draw_side_bar(frame: np.ndarray):
         frame,
         (x1 + r, y1),
         (x2 - r, y2),
-        (40, 40, 40), -1,
+        COL_BLACK, -1,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x1, y1 + r),
+        (x1, y2 - r),
+        COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x2, y1 + r),
+        (x2, y2 - r),
+        COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x1 + r, y1),
+        (x2 - r, y1),
+        COL_YELLOW, 1,
+        cv2.LINE_AA
+    )
+
+    cv2.line(
+        frame,
+        (x1 + r, y2),
+        (x2 - r, y2),
+        COL_YELLOW, 1,
         cv2.LINE_AA
     )
 
@@ -194,8 +264,8 @@ while True:
         (20, 50),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
-        (0, 255, 0) if admin_data is not None
-        else (0, 0, 255), 1, cv2.LINE_AA
+        COL_GREEN if admin_data is not None
+        else COL_RED, 1, cv2.LINE_AA
     )
 
     cv2.putText(
@@ -204,16 +274,17 @@ while True:
         (20, 65),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.5,
-        (0, 255, 0) if current_user != "Unknown"
-        else (0, 0, 255), 1,
+        COL_GREEN if current_user is not "Unknown"
+        else COL_RED, 1,
         cv2.LINE_AA
     )
 
+    # DRAW LINE
     cv2.line(
         frame,
         (20, 130),
         (int(w/5) - 10, 130),
-        (0, 200, 240), 1
+        COL_YELLOW, 1
     )
 
     if admin_data is not None:
@@ -223,7 +294,7 @@ while True:
                 roi.astype(np.float32) - admin_data
             )
         )
-        if difference < 20:
+        if difference < 25:
             current_user = "Admin"
         else:
             current_user = "Unknown"
@@ -238,7 +309,7 @@ while True:
         "Current admin",
         (20, h - 500),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.8, (255, 255, 255), 1,
+        0.8, COL_WHITE, 1,
         cv2.LINE_AA
     )
     frame[h - 450:h - 450 + 200:, 30:30 + 200] = admin_img
@@ -295,6 +366,7 @@ while True:
 
     if key == ord('r'):
         admin_data = None
+        current_user = "Unknown"
         counted_frames = 0
 
     cv2.imshow("frame", frame)
