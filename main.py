@@ -173,7 +173,12 @@ def draw_bbox(x1, y1, x2, y2):
     )
 
 
-def draw_side_bar(frame: np.ndarray):
+def draw_side_bar(
+        frame: np.ndarray,
+        admin_status: str,
+        current_user: str,
+        admin_img: np.ndarray
+    ):
     h, w = frame.shape[:2]
     x1 = 10
     y1 = 20
@@ -181,6 +186,10 @@ def draw_side_bar(frame: np.ndarray):
     y2 = h - 100
     r = 10
 
+    # -------------------------------
+    # DRAW BOX
+    # -------------------------------
+    # TOP-LEFT CORNER
     cv2.circle(
         frame,
         (x1 + r, y1 + r),
@@ -188,6 +197,7 @@ def draw_side_bar(frame: np.ndarray):
         cv2.LINE_AA
     )
 
+    # TOP-RIGGHT CORNER
     cv2.circle(
         frame,
         (x2 - r, y1 + r),
@@ -195,6 +205,7 @@ def draw_side_bar(frame: np.ndarray):
         cv2.LINE_AA
     )
 
+    # BOTTOM-LEFT CORNER
     cv2.circle(
         frame,
         (x1 + r, y2 - r),
@@ -202,6 +213,7 @@ def draw_side_bar(frame: np.ndarray):
         cv2.LINE_AA
     )
 
+    # BOTTOM-RIGHT CORNER
     cv2.circle(
         frame,
         (x2 - r, y2 - r),
@@ -302,30 +314,9 @@ def draw_side_bar(frame: np.ndarray):
     )
 
 
-while True:
-    ret, frame = cap.read()
-    frame = cv2.flip(frame, 1)
-
-    result = face.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    h, w = frame.shape[:2]
-    
-    if result.detections:
-        for detection in result.detections:
-            bbox = detection.location_data.relative_bounding_box
-
-            x1 = max(0, int(bbox.xmin * w))
-            y1 = max(0, int(bbox.ymin * h))
-
-            x2 = min(w, int(x1 + bbox.width * w))
-            y2 = min(h, int(y1 + bbox.height * h))
-
-            roi = frame[y1:y2, x1:x2]
-            roi = cv2.resize(roi, (640, 640))
-
-            draw_bbox(x1, y1, x2, y2)
-
-    draw_side_bar(frame)
-
+    # -------------------------------
+    # TEXTS
+    # -------------------------------
     cv2.putText(
         frame,
         f"Admin: {admin_status}",
@@ -346,23 +337,6 @@ while True:
         else COL_RED, 1,
         cv2.LINE_AA
     )
-
-    if admin_data is not None:
-        admin_status = "Active"
-        difference = np.mean(
-            np.abs(
-                roi.astype(np.float32) - admin_data
-            )
-        )
-        if difference < 25:
-            current_user = "Admin"
-        else:
-            current_user = "Unknown"
-
-        admin_img = cv2.resize(admin_data.copy(), (200, 200))
-
-    else:
-        admin_img = np.zeros((200, 200, 3), dtype=np.uint8)
 
     cv2.putText(
         frame,
@@ -390,6 +364,53 @@ while True:
         cv2.FONT_HERSHEY_SIMPLEX,
         0.4, (180, 180, 180), 1,
         cv2.LINE_AA
+    )
+
+
+while True:
+    ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
+
+    result = face.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    h, w = frame.shape[:2]
+    
+    if result.detections:
+        for detection in result.detections:
+            bbox = detection.location_data.relative_bounding_box
+
+            x1 = max(0, int(bbox.xmin * w))
+            y1 = max(0, int(bbox.ymin * h))
+
+            x2 = min(w, int(x1 + bbox.width * w))
+            y2 = min(h, int(y1 + bbox.height * h))
+
+            roi = frame[y1:y2, x1:x2]
+            roi = cv2.resize(roi, (640, 640))
+
+            draw_bbox(x1, y1, x2, y2)
+
+    if admin_data is not None:
+        admin_status = "Active"
+        difference = np.mean(
+            np.abs(
+                roi.astype(np.float32) - admin_data
+            )
+        )
+        if difference < 25:
+            current_user = "Admin"
+        else:
+            current_user = "Unknown"
+
+        admin_img = cv2.resize(admin_data.copy(), (200, 200))
+
+    else:
+        admin_img = np.zeros((200, 200, 3), dtype=np.uint8)
+
+    draw_side_bar(
+        frame,
+        admin_status,
+        current_user,
+        admin_img
     )
 
     key = cv2.waitKey(1) & 0xFF
