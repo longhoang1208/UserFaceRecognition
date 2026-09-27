@@ -423,7 +423,7 @@ while True:
 
         cv2.putText(
             frame,
-            f"Scanning {int((counted_frames/num_frames)*100)}%",
+            f"Scanning {int((counted_frames/num_frames)*100)}%...",
             (20, 100),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5, (150, 150, 150), 1,
@@ -432,7 +432,7 @@ while True:
 
         cv2.putText(
             frame,
-            "Slightly turn your face left and right",
+            "Please keep your face still.",
             (20, 120),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.4, (150, 150, 150), 1,
