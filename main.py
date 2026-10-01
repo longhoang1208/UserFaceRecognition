@@ -186,9 +186,11 @@ def draw_side_bar(
     y2 = h - 100
     r = 10
 
-    # -------------------------------
-    # DRAW BOX
-    # -------------------------------
+    """
+    -------------------------------
+    DRAW BOX
+    -------------------------------
+    """
     # TOP-LEFT CORNER
     cv2.circle(
         frame,
@@ -221,6 +223,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # TOP-LEFT CORNER BORDER
     cv2.circle(
         frame,
         (x1 + r, y1 + r),
@@ -228,6 +231,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # TOP-RIGHT CORNER BORDER
     cv2.circle(
         frame,
         (x2 - r, y1 + r),
@@ -235,6 +239,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # BOTTOM-LEFT CORNER BORDER
     cv2.circle(
         frame,
         (x1 + r, y2 - r),
@@ -242,6 +247,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # BOTTOM-RIGHT CORNER BORDER
     cv2.circle(
         frame,
         (x2 - r, y2 - r),
@@ -249,6 +255,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # FILL BOX SIDE LEFT
     cv2.rectangle(
         frame,
         (x1, y1 + r),
@@ -257,6 +264,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # FILL BOX SIDE RIGHT
     cv2.rectangle(
         frame,
         (x2, y1 + r),
@@ -265,6 +273,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # FILL INNER BOX
     cv2.rectangle(
         frame,
         (x1 + r, y1),
@@ -273,6 +282,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # LEFT BORDER
     cv2.line(
         frame,
         (x1, y1 + r),
@@ -281,6 +291,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # RIGHT BORDER
     cv2.line(
         frame,
         (x2, y1 + r),
@@ -289,6 +300,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # TOP BORDER
     cv2.line(
         frame,
         (x1 + r, y1),
@@ -297,6 +309,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # BOTTOM BORDER
     cv2.line(
         frame,
         (x1 + r, y2),
@@ -314,9 +327,12 @@ def draw_side_bar(
     )
 
 
-    # -------------------------------
-    # TEXTS
-    # -------------------------------
+    """
+    -------------------------------
+    TEXTS
+    -------------------------------
+    """
+    # ADMIN STATUS
     cv2.putText(
         frame,
         f"Admin: {admin_status}",
@@ -327,6 +343,7 @@ def draw_side_bar(
         else COL_RED, 1, cv2.LINE_AA
     )
 
+    # USER DETECTED
     cv2.putText(
         frame,
         f"User: {current_user}",
@@ -338,6 +355,7 @@ def draw_side_bar(
         cv2.LINE_AA
     )
 
+    # CURRENT ADMIN IMAGE
     cv2.putText(
         frame,
         "Current admin",
@@ -346,8 +364,10 @@ def draw_side_bar(
         0.8, COL_WHITE, 1,
         cv2.LINE_AA
     )
+    # Replace the area by admin img
     frame[h - 450:h - 450 + 200:, 30:30 + 200] = admin_img
 
+    # USER GUIDES
     cv2.putText(
         frame,
         "Press 'R' to remove current admin",
