@@ -2,21 +2,13 @@
 import cv2
 import numpy as np
 import mediapipe as mp
+from drawing_utils import draw_bbox
+from drawing_utils import draw_side_bar
 
 
 # =====================================
 # CONFIGURATIONS
 # =====================================
-
-# -------------------------------
-# COLORS
-# -------------------------------
-COL_YELLOW = (0, 200, 240)
-COL_GREEN  = (0, 255, 0)
-COL_RED    = (0, 0, 255)
-COL_WHITE  = (255, 255, 255)
-COL_BLACK  = (40, 40, 40)
-
 
 # -------------------------------
 # CAMERA READER
@@ -54,338 +46,7 @@ admin_data = None
 admin_status = "Not found"
 current_user = "Unknown"
 
-
-# -------------------------------
-# ROI & BOUNDING BOX
-# -------------------------------
-roi = None
-bbox_corner_size = 40
-bbox_center_mid_size = 20
-
 # =====================================
-
-
-def draw_bbox(x1, y1, x2, y2):
-    center = int((x1 + x2)/2)
-    middle = int((y1 + y2)/2)
-
-    rect_thick = 2
-    corner_thick = 8
-    cv2.rectangle(
-        frame,
-        (x1, y1),
-        (x2, y2),
-        COL_GREEN, rect_thick,
-        cv2.LINE_AA
-    )
-
-    # TOP - RIGHT
-    cv2.line(
-        frame,
-        (x1, y1),
-        (x1, y1 + bbox_corner_size),
-        COL_GREEN, corner_thick
-    )
-
-    cv2.line(
-        frame,
-        (x1, y1),
-        (x1 + bbox_corner_size, y1),
-        COL_GREEN, corner_thick
-    )
-
-    # TOP - LEFT
-    cv2.line(
-        frame,
-        (x2, y1),
-        (x2, y1 + bbox_corner_size),
-        COL_GREEN, corner_thick
-    )
-
-    cv2.line(
-        frame,
-        (x2, y1),
-        (x2 - bbox_corner_size, y1),
-        COL_GREEN, corner_thick
-    )
-
-    # BOTTOM - RIGHT
-    cv2.line(
-        frame,
-        (x1, y2),
-        (x1, y2 - bbox_corner_size),
-        COL_GREEN, corner_thick
-    )
-
-    cv2.line(
-        frame,
-        (x1, y2),
-        (x1 + bbox_corner_size, y2),
-        COL_GREEN, corner_thick
-    )
-
-    # BOTTOM - LEFT
-    cv2.line(
-        frame,
-        (x2, y2),
-        (x2, y2 - bbox_corner_size),
-        COL_GREEN, corner_thick
-    )
-
-    cv2.line(
-        frame,
-        (x2, y2),
-        (x2 - bbox_corner_size, y2),
-        COL_GREEN, corner_thick
-    )
-
-
-    cv2.line(
-        frame,
-        (center, y1),
-        (center, y1 + bbox_center_mid_size),
-        COL_GREEN, rect_thick,
-        cv2.LINE_AA
-    )
-
-    cv2.line(
-        frame,
-        (center, y2),
-        (center, y2 - bbox_center_mid_size),
-        COL_GREEN, rect_thick,
-        cv2.LINE_AA
-    )
-
-    cv2.line(
-        frame,
-        (x1, middle),
-        (x1 + bbox_center_mid_size, middle),
-        COL_GREEN, rect_thick,
-        cv2.LINE_AA
-    )
-
-    cv2.line(
-        frame,
-        (x2, middle),
-        (x2 - bbox_center_mid_size, middle),
-        COL_GREEN, rect_thick,
-        cv2.LINE_AA
-    )
-
-
-def draw_side_bar(
-        frame: np.ndarray,
-        admin_status: str,
-        current_user: str,
-        admin_img: np.ndarray
-    ):
-    h, w = frame.shape[:2]
-    x1 = 10
-    y1 = 20
-    x2 = int(w/5)
-    y2 = h - 100
-    r = 10
-
-    """
-    -------------------------------
-    DRAW BOX
-    -------------------------------
-    """
-    # TOP-LEFT CORNER
-    cv2.circle(
-        frame,
-        (x1 + r, y1 + r),
-        r, COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # TOP-RIGGHT CORNER
-    cv2.circle(
-        frame,
-        (x2 - r, y1 + r),
-        r, COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # BOTTOM-LEFT CORNER
-    cv2.circle(
-        frame,
-        (x1 + r, y2 - r),
-        r, COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # BOTTOM-RIGHT CORNER
-    cv2.circle(
-        frame,
-        (x2 - r, y2 - r),
-        r, COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # TOP-LEFT CORNER BORDER
-    cv2.circle(
-        frame,
-        (x1 + r, y1 + r),
-        r, COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # TOP-RIGHT CORNER BORDER
-    cv2.circle(
-        frame,
-        (x2 - r, y1 + r),
-        r, COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # BOTTOM-LEFT CORNER BORDER
-    cv2.circle(
-        frame,
-        (x1 + r, y2 - r),
-        r, COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # BOTTOM-RIGHT CORNER BORDER
-    cv2.circle(
-        frame,
-        (x2 - r, y2 - r),
-        r, COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # FILL BOX SIDE LEFT
-    cv2.rectangle(
-        frame,
-        (x1, y1 + r),
-        (x1 + r, y2 - r),
-        COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # FILL BOX SIDE RIGHT
-    cv2.rectangle(
-        frame,
-        (x2, y1 + r),
-        (x2 - r, y2 - r),
-        COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # FILL INNER BOX
-    cv2.rectangle(
-        frame,
-        (x1 + r, y1),
-        (x2 - r, y2),
-        COL_BLACK, -1,
-        cv2.LINE_AA
-    )
-
-    # LEFT BORDER
-    cv2.line(
-        frame,
-        (x1, y1 + r),
-        (x1, y2 - r),
-        COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # RIGHT BORDER
-    cv2.line(
-        frame,
-        (x2, y1 + r),
-        (x2, y2 - r),
-        COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # TOP BORDER
-    cv2.line(
-        frame,
-        (x1 + r, y1),
-        (x2 - r, y1),
-        COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # BOTTOM BORDER
-    cv2.line(
-        frame,
-        (x1 + r, y2),
-        (x2 - r, y2),
-        COL_YELLOW, 1,
-        cv2.LINE_AA
-    )
-
-    # DRAW HORZ LINE
-    cv2.line(
-        frame,
-        (x1, 130),
-        (x2, 130),
-        COL_YELLOW, 1
-    )
-
-
-    """
-    -------------------------------
-    TEXTS
-    -------------------------------
-    """
-    # ADMIN STATUS
-    cv2.putText(
-        frame,
-        f"Admin: {admin_status}",
-        (20, 50),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.5,
-        COL_GREEN if admin_data is not None
-        else COL_RED, 1, cv2.LINE_AA
-    )
-
-    # USER DETECTED
-    cv2.putText(
-        frame,
-        f"User: {current_user}",
-        (20, 65),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.5,
-        COL_GREEN if current_user != "Unknown"
-        else COL_RED, 1,
-        cv2.LINE_AA
-    )
-
-    # CURRENT ADMIN IMAGE
-    cv2.putText(
-        frame,
-        "Current admin",
-        (20, h - 500),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.8, COL_WHITE, 1,
-        cv2.LINE_AA
-    )
-    # Replace the area by admin img
-    frame[h - 450:h - 450 + 200:, 30:30 + 200] = admin_img
-
-    # USER GUIDES
-    cv2.putText(
-        frame,
-        "Press 'R' to remove current admin",
-        (20, h - 180),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.4, (180, 180, 180), 1,
-        cv2.LINE_AA
-    )
-
-    cv2.putText(
-        frame,
-        "Press SPACE to scan new admin",
-        (20, h - 160),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.4, (180, 180, 180), 1,
-        cv2.LINE_AA
-    )
-
 
 while True:
     ret, frame = cap.read()
@@ -407,7 +68,7 @@ while True:
             roi = frame[y1:y2, x1:x2]
             roi = cv2.resize(roi, (640, 640))
 
-            draw_bbox(x1, y1, x2, y2)
+            draw_bbox(frame, x1, y1, x2, y2)
 
     if admin_data is not None:
         admin_status = "Active"
@@ -430,7 +91,8 @@ while True:
         frame,
         admin_status,
         current_user,
-        admin_img
+        admin_img,
+        admin_data
     )
 
     key = cv2.waitKey(1) & 0xFF
